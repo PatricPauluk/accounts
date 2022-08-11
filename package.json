@@ -1,0 +1,25 @@
+{
+  "name": "accounts",
+  "version": "1.0.0",
+  "description": "Ficticional bank account manager created with Node.js. Runs only in terminal.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PatricPauluk/accounts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PatricPauluk/accounts/issues"
+  },
+  "homepage": "https://github.com/PatricPauluk/accounts#readme",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "inquirer": "^8.0.0"
+  }
+}
