@@ -27,11 +27,11 @@ function operation() {
         if (action === 'Criar conta') {
             createAccount()
         } else if (action === 'Consultar saldo') {
-
+            getAccountBalance()
         } else if (action === 'Depositar') {
             deposit()
         } else if (action === 'Sacar') {
-
+            withdraw()
         } else if (action === 'Sair') {
             console.log(chalk.bgBlue.black('Obrigado por usar o Accounts!'))
             process.exit()
@@ -47,6 +47,7 @@ function createAccount() {
 
     buildAccount()
 }
+
 function buildAccount() {
     inquirer.prompt([
         {
@@ -105,7 +106,7 @@ function deposit() {
         inquirer.prompt([
             {
                 name: 'amount',
-                message: 'Quanto você deseja depositar',
+                message: 'Quanto você deseja depositar? (em R$)',
             },
         ]).then((answer) => {
             const amount = answer['amount']
@@ -121,23 +122,114 @@ function deposit() {
 
 function checkAccount(accountName) {
     if(!fs.existsSync(`accounts/${accountName}.json`)) {
-        console.log(chalk.bgRed.black('Esta conta não existe, escolha outro nome!'))
+        console.log(chalk.bgRed.black('Esta conta não existe.'))
         return false
     }
     return true
 }
 
 function addAmount(accountName, amount) {
-    const account = getAccount(accountName)
-    console.log(account)
+    const accountData = getAccount(accountName)
+
+    if (!amount) { // verifica se o campo de deposito esta vazio
+        console.log(chalk.bgRed.black('Ocorreu um erro, tente novamente.'))
+        return
+    }
+
+    accountData.balance = parseFloat(amount) + parseFloat(accountData.balance) // soma o valor informado + o valor na conta
+
+    fs.writeFileSync(`accounts/${accountName}.json`, JSON.stringify(accountData), // acrescenta o valor na conta
+    function (err) {
+        console.log(err)
+    })
+
+    console.log(chalk.green(`Foi depositado o valor de R$${amount} na sua conta!`))
 }
 
 // busca a conta
 function getAccount(accountName) {
     const accountJSON = fs.readFileSync(`accounts/${accountName}.json`, {
-        encoding: 'utf-8',
+        encoding: 'utf8',
         flag: 'r', // read (leitura)
     })
 
     return JSON.parse(accountJSON) // converte o arquivo em json novamente
+}
+
+// show account balance
+function getAccountBalance() {
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'Qual o nome da sua conta?',
+        }
+    ]).then((answer) => {
+        
+        const accountName = answer['accountName']
+
+        // verify if account exists
+        if (!checkAccount(accountName)) {
+            return getAccountBalance()
+        }
+
+        const accountData = getAccount(accountName)
+
+        console.log(chalk.bgBlue.black(`Olá, o saldo da sua conta é de R$${accountData.balance}`))
+        operation()
+
+    }).catch(err => console.log(err))
+}
+
+// withdraw an amount from user account
+function withdraw() {
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'Qual o nome da sua conta?',
+        }
+    ]).then((answer) => {
+
+        const accountName = answer['accountName']
+
+        if (!checkAccount(accountName)) {
+            return withdraw()
+        }
+
+        inquirer.prompt([
+            {
+                name: 'amount',
+                message: 'Quanto você deseja sacar?'
+            }
+        ]).then((answer) => {
+
+            const amount = answer['amount']
+            removeAmount(accountName, amount)
+
+        }).catch(err => console.log(err))
+
+    }).catch(err => console.log(err))
+}
+
+function removeAmount(accountName, amount) {
+    const accountData = getAccount(accountName)
+
+    if (!amount) {
+        console.log(chalk.bgRed.black('Ocorreu um erro, tente novamente.'))
+        return withdraw()
+    }
+
+    if (accountData.balance < amount) {
+        console.log(chalk.bgRed.black('Valor indisponível.'))
+        return withdraw()
+    }
+
+    accountData.balance = parseFloat(accountData.balance) - parseFloat(amount)
+
+    fs.writeFileSync(`accounts/${accountName}.json`, JSON.stringify(accountData),
+    function (err) {
+        console.log(err)
+    })
+
+    console.log(chalk.green(`Foi realizado um saque de R$${amount} da sua conta.`))
+    operation()
 }
