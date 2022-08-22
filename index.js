@@ -210,6 +210,7 @@ function withdraw() {
     }).catch(err => console.log(err))
 }
 
+// remove amount from account
 function removeAmount(accountName, amount) {
     const accountData = getAccount(accountName)
 
