@@ -100,7 +100,7 @@ function deposit() {
 
         // verify if account exists
         if(!checkAccount(accountName)) {
-            return deposit()
+            return operation()
         }
 
         inquirer.prompt([
@@ -169,7 +169,7 @@ function getAccountBalance() {
 
         // verify if account exists
         if (!checkAccount(accountName)) {
-            return getAccountBalance()
+            return operation()
         }
 
         const accountData = getAccount(accountName)
@@ -192,7 +192,7 @@ function withdraw() {
         const accountName = answer['accountName']
 
         if (!checkAccount(accountName)) {
-            return withdraw()
+            return operation()
         }
 
         inquirer.prompt([
